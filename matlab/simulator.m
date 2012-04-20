@@ -1,4 +1,4 @@
-function simulator(K, muS , muK)
+function [Force] = simulator(K, muS , muK)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,20 +9,24 @@ loc = 0; %loc is for estimating the current position of the robot.
 pos =3; %position where the object is located
 mass =2;
 g = 9.8;
+contact =0; %intially no contact
+motion =0;%initioally no motion
 
 %debugging infor and plots
-Force = 
+Force = 0:0.1:pos+2;
+index =1;
 
 static = muS*mass*g;
 kinetic = muK*mass*g;
 
-for xnext = 0.1:0.1:10 %increment deltax through the simulator
+for xnext = 0.1:0.1:pos+2 %increment deltax through the simulator
 deltax = xnext-xprev;
+F = K * deltax;
 
 % See if the robot is in contact with the object
 %Assume that the object os located at x = 3
-loc = loc+xnext;
-if(loc >= pos)
+loc = xnext;
+if(loc >= pos && F< static)
     contact = 1;
 end
 
@@ -40,6 +44,7 @@ end
 if(motion ==0 && contact ==1)
     %keep the current position of the robot as same
     F = K * deltax;
+    Force(index) = F;
 end
 
 
@@ -48,19 +53,18 @@ if(motion ==1 && contact ==1)
     %the force is a difference in static and kinetic friction
     F = static - kinetic + F * deltax ;
     xprev = xnext; %update the next position sinnce it is moving
+    Force(index) = F;
 end
 
 %If not in contact with object
 if(contact ==0)
     F =0; % Force is zero if there is no contact
-    xprev = xnext; %update the nect position
+    xprev = xnext; %update the next position
+    Force(index) = F;
 end
-
-
-
+index = index+1;
 
 end
-
 
 end
 
